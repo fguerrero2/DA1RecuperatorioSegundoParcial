@@ -31,7 +31,8 @@ class PanelActivity : ComponentActivity(), SensorEventListener {
                 model.state.collectAsStateWithLifecycle().value,
                 refresh = { model.load(true) },
                 inspect = model::inspect,
-                lowBatteryOnly = model::showLowBatteryOnly
+                lowBatteryOnly = model::showLowBatteryOnly,
+                markInspected = model::markInspected
             )
         }
     }
