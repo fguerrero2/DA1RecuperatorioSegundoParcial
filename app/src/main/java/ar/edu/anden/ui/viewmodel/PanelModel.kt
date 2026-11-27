@@ -2,6 +2,7 @@ package ar.edu.anden.ui.viewmodel
 
 import ar.edu.anden.data.model.Robot
 import ar.edu.anden.data.repository.FleetRepository
+import ar.edu.anden.data.repository.InvalidRoundException
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -102,6 +103,10 @@ class PanelModel(app: Application, private val saved: SavedStateHandle) : Androi
                 if (selected != null && rows.none { it.id == selected }) select(null)
             } catch (cancel: CancellationException) {
                 throw cancel
+            } catch (invalid: InvalidRoundException) {
+                current.update {
+                    it.copy(status = "Ronda rechazada: ${invalid.message}. Se conserva la última copia válida.")
+                }
             } catch (error: Exception) {
                 current.update { it.copy(status = "Lectura fallida. Podés reintentar.") }
             } finally {
