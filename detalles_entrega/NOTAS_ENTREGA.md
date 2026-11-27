@@ -24,4 +24,12 @@ ya que se borraran siempre los datos
   - Pasar a la versión 2 con un onUpgrade que cree la tabla.
   - Ningún cambio va por la red, así que funciona sin conexión.
 
-  
+  D) Cuarta decision tomada (refactorizar)
+
+  Al escribir no tenemos validaciones implementadas y son necesarias para el pedido 4.  Vamos a modificar "data/repository/FleetRepository.kt"
+  Actualmente Lo que manda la API va directo a SQLite.
+
+- Síntoma: con la ronda invalida (AMR-03 con 145 %), la base y la pantalla aceptan el 145 % y se pierde la última copia válida.
+- Refactor: el repositorio valida antes de escribir. Si alguna batería está fuera de 0..100, lanza InvalidRoundException(motivo) sin tocar la base.
+  - La última copia válida se conserva aunque reinicies la app, porque nunca se escribió nada.
+  - Una lista vacía pasa la validación y replace(emptyList()) ya funciona dentro de la transacción, así que la ronda vacia se acepta sin cambios.
