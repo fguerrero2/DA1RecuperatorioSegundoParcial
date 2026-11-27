@@ -27,7 +27,12 @@ class PanelActivity : ComponentActivity(), SensorEventListener {
         setContentView(R.layout.panel)
         tilt = findViewById(R.id.tilt)
         findViewById<ComposeView>(R.id.board).setContent {
-            Board(model.state.collectAsStateWithLifecycle().value, { model.load(true) }, model::inspect)
+            Board(
+                model.state.collectAsStateWithLifecycle().value,
+                refresh = { model.load(true) },
+                inspect = model::inspect,
+                lowBatteryOnly = model::showLowBatteryOnly
+            )
         }
     }
     override fun onResume() {
