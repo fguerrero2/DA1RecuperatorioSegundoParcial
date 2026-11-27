@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
 
 data class PanelState(
     val rows: List<Robot> = emptyList(),
-    val detail: Robot? = null,
+    val selectedId: String? = null,
     val busy: Boolean = false,
     val status: String = "",
     val lowBatteryOnly: Boolean = false
@@ -26,6 +26,13 @@ data class PanelState(
     val visible: List<Robot>
         get() = if (lowBatteryOnly) rows.filter { it.battery < LOW_BATTERY } else rows
 
+    /**
+     * Ficha de la unidad seleccionada, siempre con los datos de la ronda vigente.
+     * Se busca en [rows] y no en [visible]: filtrar solo cambia la lista, no la ficha.
+     */
+    val detail: Robot?
+        get() = selectedId?.let { id -> rows.find { it.id == id } }
+
     companion object {
         const val LOW_BATTERY = 30
     }
@@ -33,7 +40,12 @@ data class PanelState(
 
 class PanelModel(app: Application, private val saved: SavedStateHandle) : AndroidViewModel(app) {
     private val repo = FleetRepository(app)
-    private val current = MutableStateFlow(PanelState(lowBatteryOnly = saved[KEY_LOW_BATTERY] ?: false))
+    private val current = MutableStateFlow(
+        PanelState(
+            selectedId = saved[KEY_SELECTED],
+            lowBatteryOnly = saved[KEY_LOW_BATTERY] ?: false
+        )
+    )
     val state = current.asStateFlow()
 
     init { load(false) }
@@ -43,7 +55,12 @@ class PanelModel(app: Application, private val saved: SavedStateHandle) : Androi
         current.update { it.copy(lowBatteryOnly = enabled) }
     }
 
-    fun inspect(robot: Robot) = current.update { it.copy(detail = robot) }
+    fun inspect(robot: Robot) = select(robot.id)
+
+    private fun select(id: String?) {
+        saved[KEY_SELECTED] = id
+        current.update { it.copy(selectedId = id) }
+    }
 
     fun load(remote: Boolean) {
         if (current.value.busy) return
@@ -52,6 +69,10 @@ class PanelModel(app: Application, private val saved: SavedStateHandle) : Androi
             try {
                 val rows = withContext(Dispatchers.IO) { if (remote) repo.refresh() else repo.local() }
                 current.update { it.copy(rows = rows, status = if (remote) "Actualización recibida" else "Copia local") }
+                // Si la unidad seleccionada ya no está en la ronda, se cierra su ficha
+                // (y no se reabre sola si vuelve a aparecer en una ronda posterior).
+                val selected = current.value.selectedId
+                if (selected != null && rows.none { it.id == selected }) select(null)
             } catch (cancel: CancellationException) {
                 throw cancel
             } catch (error: Exception) {
@@ -65,5 +86,6 @@ class PanelModel(app: Application, private val saved: SavedStateHandle) : Androi
 
     private companion object {
         const val KEY_LOW_BATTERY = "lowBatteryOnly"
+        const val KEY_SELECTED = "selectedId"
     }
 }
