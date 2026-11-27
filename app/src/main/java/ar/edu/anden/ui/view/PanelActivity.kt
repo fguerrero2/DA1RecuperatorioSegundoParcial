@@ -1,4 +1,7 @@
-package ar.edu.anden
+package ar.edu.anden.ui.view
+
+import ar.edu.anden.R
+import ar.edu.anden.ui.viewmodel.PanelModel
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent

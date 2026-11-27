@@ -1,4 +1,7 @@
-package ar.edu.anden
+package ar.edu.anden.ui.view
+
+import ar.edu.anden.data.model.Robot
+import ar.edu.anden.ui.viewmodel.PanelState
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
