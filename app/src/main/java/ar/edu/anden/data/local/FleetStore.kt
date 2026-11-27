@@ -1,18 +1,10 @@
-package ar.edu.anden
+package ar.edu.anden.data.local
 
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-
-data class Robot(val id: String, val sector: String, val battery: Int)
-
-interface FleetApi {
-    @GET("fleet") suspend fun read(): List<Robot>
-}
+import ar.edu.anden.data.model.Robot
 
 class FleetStore(context: Context) : SQLiteOpenHelper(context, "anden.db", null, 1) {
     override fun onCreate(db: SQLiteDatabase) {
@@ -47,17 +39,4 @@ class FleetStore(context: Context) : SQLiteOpenHelper(context, "anden.db", null,
             db.endTransaction()
         }
     }
-}
-
-class FleetRepository(context: Context) {
-    private val store = FleetStore(context)
-    private val api = Retrofit.Builder().baseUrl("http://localhost:8765/")
-        .addConverterFactory(GsonConverterFactory.create()).build().create(FleetApi::class.java)
-
-    fun local() = store.read()
-    suspend fun refresh(): List<Robot> {
-        store.replace(api.read())
-        return local()
-    }
-    fun close() = store.close()
 }

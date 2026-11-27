@@ -1,4 +1,7 @@
-package ar.edu.anden
+package ar.edu.anden.ui.viewmodel
+
+import ar.edu.anden.data.model.Robot
+import ar.edu.anden.data.repository.FleetRepository
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
