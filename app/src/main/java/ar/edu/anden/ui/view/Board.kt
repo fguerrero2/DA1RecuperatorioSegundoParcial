@@ -19,7 +19,8 @@ fun Board(
     state: PanelState,
     refresh: () -> Unit,
     inspect: (Robot) -> Unit,
-    lowBatteryOnly: (Boolean) -> Unit
+    lowBatteryOnly: (Boolean) -> Unit,
+    markInspected: () -> Unit
 ) {
     MaterialTheme {
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp),
@@ -34,6 +35,12 @@ fun Board(
                         Column(Modifier.padding(12.dp)) {
                             Text("Ficha · ${robot.id}", style = MaterialTheme.typography.titleLarge)
                             Text("${robot.sector} · Batería ${robot.battery}%")
+                            if (state.detailInspected) {
+                                Text("✓ Revisada", color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.titleMedium)
+                            } else {
+                                Button(onClick = markInspected) { Text("Marcar como revisada") }
+                            }
                         }
                     }
                 }

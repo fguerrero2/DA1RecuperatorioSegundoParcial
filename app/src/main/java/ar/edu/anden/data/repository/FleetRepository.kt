@@ -17,5 +17,7 @@ class FleetRepository(
         store.replace(api.read())
         return local()
     }
+    fun inspected() = store.inspected()
+    fun markInspected(id: String) = store.markInspected(id)
     fun close() = store.close()
 }

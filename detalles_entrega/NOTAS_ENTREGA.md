@@ -14,3 +14,14 @@ Debemos modificar el archivo "ui/viewmodel/PanelModel.kt"
   - Como se busca en rows y no en visible, filtrar no toca la ficha ("Filtrar la lista solo cambia la lista").
   - Opcional: guardar selectedId en SavedStateHandle, como el filtro.
 
+C) Tercera Decisión tomada (refactorizar)
+Debemos corregir los archivos para persistencia porque "FleetStore.kt" borra toda la tabla al actualizar, con esto no podemos marcar como inspeccionada una unidad
+ya que se borraran siempre los datos
+
+- Refactor:
+  - Separar dos responsabilidades: la copia de la ronda (fleet, se reemplaza entera) y el registro del operador (una tabla inspection(id TEXT PRIMARY KEY) que replace() no toca).
+  - Marcar con INSERT OR IGNORE o insertWithOnConflict(..., CONFLICT_IGNORE). Así marcar dos veces tiene el mismo efecto que marcar una, y la identidad es el id.
+  - Pasar a la versión 2 con un onUpgrade que cree la tabla.
+  - Ningún cambio va por la red, así que funciona sin conexión.
+
+  
